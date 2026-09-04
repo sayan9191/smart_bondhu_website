@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Smart Bondhu — trusted home and lifestyle services, made simple." />
+  <title>Smart Bondhu — Together for a Better Tomorrow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="topline"><span>Smart help for everyday living</span><span class="topline-right"><a href="tel:+918910754862">+91 89107 54862</a> &nbsp;|&nbsp; Have a requirement? <a href="#enquiry">Tell us about it →</a></span></div>
+  <header class="nav" id="nav">
+    <a class="brand" href="#top" aria-label="Smart Bondhu home"><img class="official-logo" src="assets/smart-bondhu-logo.jpeg" alt="Smart Bondhu logo" /><span><b>SMART</b> BONDHU<small>Together for a better tomorrow</small></span></a>
+    <nav class="desktop-nav"><a href="#services">Services</a><a href="#how">How it works</a><a href="#why">Why us</a><a href="#projects">Projects</a><a href="#about">About</a></nav>
+    <div class="nav-actions"><button class="button small quote-trigger">Get a service quote <span>→</span></button></div>
+    <button class="menu" aria-label="Open menu" onclick="toggleMenu()">☰</button>
+  </header>
+  <div class="mobile-menu" id="mobileMenu"><a href="#services">Services</a><a href="#how">How it works</a><a href="#why">Why Smart Bondhu</a><a href="#projects">Projects</a><a href="tel:+918910754862" style="display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--green);color:#fff;border-radius:8px;justify-content:center">Call +91 89107 54862</a><button class="button quote-trigger">Get a quote →</button></div>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> Your home, in capable hands</p>
+        <h1>Everything your home needs.<br><em>One Smart Bondhu.</em></h1>
+        <p class="hero-text">From a leaking tap to a complete home makeover, discover reliable services and get the right help without the hassle.</p>
+        <div class="hero-actions"><button class="button quote-trigger">Get a service quote <span>→</span></button><a class="play-link" href="#services"><span>↓</span> Explore services</a></div>
+        <div class="trust-row"><span>✓ Trusted professionals</span><span>✓ Transparent process</span><span>✓ Easy enquiry</span></div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-photo"></div><div class="image-chip chip-one">Verified support<br><b>for every requirement</b></div><div class="image-chip chip-two"><strong>01</strong><span>Tell us<br>what you need</span></div>
+      </div>
+      <div class="search-panel">
+        <div class="search-label">What do you need help with?</div>
+        <div class="search-box"><span>⌕</span><input id="serviceSearch" placeholder="Try ‘tap repair’, ‘AC repair’, ‘home painting’…" /><button onclick="searchService()">Find a service</button></div>
+        <div class="popular">Popular: <button onclick="quickSearch('Plumber')">Plumber</button><button onclick="quickSearch('Electrician')">Electrician</button><button onclick="quickSearch('Carpenter')">Carpenter</button><button onclick="quickSearch('Painting')">Painting</button><button onclick="quickSearch('Cleaning')">Cleaning</button></div>
+      </div>
+    </section>
+
+    <section class="intro-strip"><p>Not sure which service you need?</p><strong>Tell us your problem — we’ll help you find the right service.</strong><button class="arrow-round quote-trigger">→</button></section>
+
+    <section class="bondhu-match" aria-label="Bondhu Match concierge"><div class="match-orbit orbit-one"></div><div class="match-orbit orbit-two"></div><div class="match-copy"><p class="eyebrow"><span></span> Smart Bondhu signature</p><h2>Meet your <em>Bondhu<br>Match.</em></h2><p>Choose what’s on your mind. We’ll point you to the right kind of help—without making you learn service jargon first.</p><div class="match-status"><span class="status-dot"></span> Listening for your requirement</div></div><div class="match-choices"><button onclick="matchNeed('Something at home stopped working')"><span>01</span><b>Fix something</b><small>Repairs & appliances</small><i>→</i></button><button onclick="matchNeed('I want my home to feel better')"><span>02</span><b>Refresh my space</b><small>Painting & cleaning</small><i>→</i></button><button onclick="matchNeed('I need regular help')"><span>03</span><b>Make life easier</b><small>Recurring services</small><i>→</i></button><button onclick="matchNeed('I am planning a bigger home project')"><span>04</span><b>Plan a project</b><small>Interiors & transformation</small><i>→</i></button></div></section>
+
+    <section class="section services" id="services"><div class="section-head"><div><p class="eyebrow"><span></span> Find your solution</p><h2>Whatever you need,<br><em>find it here.</em></h2></div><div class="service-head-copy"><p>From quick repairs to complete home projects, Smart Bondhu brings everyday services under one roof.</p><button class="mini-quote quote-trigger">Not sure what you need? <b>Tell us →</b></button></div></div>
+      <div class="category-grid" id="categoryGrid"></div>
+      <button class="outline center-btn" onclick="openAllServices()">Explore all services <span>→</span></button>
+    </section>
+
+    <section class="section popular-services"><div class="section-head compact"><div><p class="eyebrow"><span></span> Everyday favourites</p><h2>Most requested<br><em>services.</em></h2></div><a class="under-link" href="#services">View all services →</a></div><div class="popular-grid" id="popularGrid"></div></section>
+
+    <section class="repair-band"><div><p class="eyebrow light"><span></span> Quick fixes, made easy</p><h2>Small problem?<br><em>We’ll help you fix it.</em></h2><p>Leaking tap, broken switch, a fan that won’t start — start with a simple enquiry and we’ll take it from there.</p><button class="button cream quote-trigger">Find a solution <span>→</span></button></div><div class="problem-list"><div><b>01</b><span>Leaking tap?</span><i>↗</i></div><div><b>02</b><span>Fan not working?</span><i>↗</i></div><div><b>03</b><span>TV needs mounting?</span><i>↗</i></div><div><b>04</b><span>Laptop acting up?</span><i>↗</i></div></div></section>
+
+    <section class="section pricing"><div class="pricing-art"></div><div class="pricing-copy"><p class="eyebrow"><span></span> Clear from the start</p><h2>Know how<br><em>pricing works.</em></h2><p>Every service has a pricing approach that makes sense for the job. You’ll understand the next step before you proceed.</p><div class="price-list"><div><b>Fixed services</b><span>Know the service charge upfront.</span></div><div><b>Inspection services</b><span>Some problems need a professional look first.</span></div><div><b>Project services</b><span>Consultation, quote and milestone-based execution.</span></div></div></div></section>
+
+    <section class="section how" id="how"><div class="center-head"><p class="eyebrow"><span></span> Simple, considered, human</p><h2>How Smart Bondhu <em>works.</em></h2></div><div class="steps"><article><b>01</b><h3>Choose a service</h3><p>Find the service that matches your requirement.</p></article><article><b>02</b><h3>Tell us what you need</h3><p>Describe your problem or project. Photos are always helpful.</p></article><article><b>03</b><h3>Get the right guidance</h3><p>Our team reviews your enquiry and provides the appropriate next step.</p></article><article><b>04</b><h3>Get it done</h3><p>Connect with the right professional and get your work completed.</p></article></div><div class="center"><button class="button quote-trigger">Start your enquiry <span>→</span></button></div></section>
+
+    <section class="section transformation" id="projects"><div class="transform-image"></div><div class="transform-copy"><p class="eyebrow"><span></span> Spaces with a story</p><h2>From repair to complete <em>transformation.</em></h2><p>Planning an interior, kitchen, wardrobe, ceiling or commercial space? Build it with a journey that stays clear at every stage.</p><div class="project-flow"><span>Lead</span><i>→</i><span>Consultation</span><i>→</i><span>Design</span><i>→</i><span>Execution</span></div><button class="button quote-trigger">Start your project <span>→</span></button></div></section>
+
+    <section class="section why" id="why"><div class="section-head"><div><p class="eyebrow"><span></span> Why Smart Bondhu</p><h2>More than a service.<br><em>A smarter way.</em></h2></div><p>We make it simpler to move from a home problem to the right next step.</p></div><div class="why-grid"><article><span>◒</span><h3>Trusted professionals</h3><p>Connect with people suited to your service requirement.</p></article><article><span>◎</span><h3>Transparent process</h3><p>Understand the service, pricing model and next steps before proceeding.</p></article><article><span>⌂</span><h3>One place for everything</h3><p>Repairs, upkeep, technology, vehicles and home projects.</p></article><article><span>✦</span><h3>Professional support</h3><p>We help move every enquiry toward execution.</p></article></div></section>
+
+    <section class="recurring"><div><p class="eyebrow light"><span></span> Built for the everyday</p><h2>Services that keep<br>your life <em>running.</em></h2></div><div class="recurring-tags"><span>Monthly maid</span><span>Garden maintenance</span><span>Vehicle care</span><span>RO maintenance</span><span>Recurring cleaning</span><span>Monthly driver</span></div><button class="button cream quote-trigger">Explore plans <span>→</span></button></section>
+
+    <section class="section testimonials"><div class="section-head compact"><div><p class="eyebrow"><span></span> Neighbours, beautifully served</p><h2>Made for people<br>who value <em>ease.</em></h2></div><p class="review-note">Sample local review styling — replace with verified customer reviews before launch.</p></div><div class="testimonial-grid"><article><div class="stars">★★★★★</div><p>“The enquiry process was straightforward, and I knew what would happen next. Exactly the kind of help I needed.”</p><footer><b>Riya Mukherjee</b><span>Garia · Plumbing</span></footer></article><article><div class="stars">★★★★★</div><p>“A refreshingly clear experience for a home project — from sharing my brief to understanding the quotation process.”</p><footer><b>Arindam Chatterjee</b><span>Sonarpur · Interiors</span></footer></article><article><div class="stars">★★★★★</div><p>“The service options made it easy to explain what was wrong, even though I didn’t know the technical terms.”</p><footer><b>Debolina Roy</b><span>Narendrapur · Appliance repair</span></footer></article></div></section>
+
+    <section class="section faq" id="faq"><div class="faq-title"><p class="eyebrow"><span></span> Answers, clearly</p><h2>Questions you may<br><em>have.</em></h2><p>Can’t find your answer? <button class="link-button quote-trigger">Send an enquiry →</button></p></div><div class="accordion" id="accordion"></div></section>
+
+    <section class="final-cta" id="about"><p class="eyebrow light"><span></span> A better way to begin</p><h2>Your to-do list<br>starts <em>here.</em></h2><p>Whatever needs fixing, maintaining or transforming — tell Smart Bondhu what you need.</p><div><button class="button cream quote-trigger">Get a service quote <span>→</span></button><a href="#services">Explore all services</a></div></section>
+  </main>
+  <footer><div class="footer-top"><a class="brand inverse" href="#top"><img class="official-logo" src="assets/smart-bondhu-logo.jpeg" alt="Smart Bondhu logo" /><span><b>SMART</b> BONDHU<small>Together for a better tomorrow</small></span></a><p>Smart help for every part of home and everyday life.</p></div>    <div class="footer-links"><div><b>Services</b><a href="#services">Home repairs</a><a href="#services">Gadgets & IT</a><a href="#services">Appliances</a><a href="#services">Painting & decor</a></div><div><b>Discover</b><a href="#how">How it works</a><a href="#projects">Projects</a><a href="#why">Why Smart Bondhu</a><a href="#faq">FAQs</a></div><div><b>Support</b><button onclick="showTrack()">Track enquiry</button><button class="quote-trigger">Get a quote</button><button onclick="showContact()">Contact us</button><button onclick="showHelp()">Help</button></div><div><b>Contact</b><a href="tel:+918910754862" class="footer-call">+91 89107 54862</a><a class="footer-address" href="https://maps.google.com/?q=Samali+Ghosh+Para+Nahazari+Bishnupur+Kolkata+700104" target="_blank" rel="noopener">Samali Ghosh Para, P.O. Nahazari<br>P.S. Bishnupur, Kolkata<br>West Bengal — 700104</a></div></div><div class="footer-bottom">© 2026 Smart Bondhu. Together for a better tomorrow. <span class="maintained">Website designed & maintained by <b>InfusedByte</b></span></div></footer>
+  <button class="mobile-quote quote-trigger">Get a service quote <span>→</span></button>
+  <a href="tel:+918910754862" class="floating-call" aria-label="Call Smart Bondhu">Call Now</a>
+
+  <div class="modal-backdrop" id="modal"><section class="modal"><button class="modal-close" onclick="closeModal()">×</button><div id="modalContent"></div></section></div>
+  <script src="script.js"></script>
+</body>
+</html>
