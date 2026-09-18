@@ -124,7 +124,7 @@ body:has(.modal-backdrop.show) .mobile-quote{display:none}
   box-shadow:0 0 0 1px rgba(199,237,140,.35),0 4px 12px rgba(199,237,140,.25);
   transition:.2s;
 }
-.credit-link b{color:inherit;font-weight:800}
+.footer-bottom .credit-link b{color:#102d24;font-weight:800}
 .credit-link:hover{
   background:#e4f9b5;
   transform:translateY(-1px);
