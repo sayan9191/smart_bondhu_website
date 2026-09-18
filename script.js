@@ -8,6 +8,7 @@ document.getElementById('popularGrid').innerHTML=popular.map(p=>`<article class=
 document.getElementById('accordion').innerHTML=faqs.map((f,i)=>`<div class="faq-item"><button class="faq-question" onclick="this.parentElement.classList.toggle('open')">${f[0]} <span>+</span></button><div class="faq-answer">${f[1]}</div></div>`).join('');
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>20));
 function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
+document.getElementById('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a,button'))document.getElementById('mobileMenu').classList.remove('open')});
 function openModal(content){document.getElementById('modalContent').innerHTML=content;document.getElementById('modal').classList.add('show')}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
