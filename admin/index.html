@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Bondhu Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-body">
+  <div id="authScreen" class="auth-wrap">
+    <div class="auth-card">
+      <img class="official-logo" src="../assets/smart-bondhu-logo.jpeg" alt="" />
+      <p class="eyebrow"><span></span> Smart Bondhu</p>
+      <h1 id="authTitle">Admin login</h1>
+      <p class="modal-sub" id="authSub">Sign in to manage enquiries and services.</p>
+      <p class="auth-error" id="authError" hidden></p>
+      <label>Email</label>
+      <input id="authEmail" type="email" autocomplete="username" placeholder="you@email.com" />
+      <label>Password</label>
+      <input id="authPassword" type="password" autocomplete="current-password" placeholder="Password" />
+      <button class="button" id="authSubmit" style="width:100%;margin-top:18px">Continue <span>→</span></button>
+    </div>
+  </div>
+
+  <div id="appScreen" hidden>
+    <header class="admin-top">
+      <a class="brand" href="/"><img class="official-logo" src="../assets/smart-bondhu-logo.jpeg" alt="" /><span><b>SMART</b> BONDHU<small>Admin panel</small></span></a>
+      <button class="menu" id="adminMenuBtn" aria-label="Open menu">☰</button>
+      <nav class="admin-tabs" id="adminTabs">
+        <button data-tab="enquiries" class="on">Enquiries</button>
+        <button data-tab="categories">Categories</button>
+        <button data-tab="services">Services</button>
+        <button data-tab="faqs">FAQs</button>
+        <button id="logoutBtn" class="ghost">Log out</button>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section data-panel="enquiries" class="panel on">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow"><span></span> Incoming</p>
+            <h2>Enquiries</h2>
+          </div>
+          <input id="enquirySearch" placeholder="Search name, phone, ID…" />
+        </div>
+        <div id="enquiryList" class="card-list"></div>
+      </section>
+
+      <section data-panel="categories" class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow"><span></span> Website</p>
+            <h2>Categories</h2>
+          </div>
+          <button class="button small" id="addCategory">Add category</button>
+        </div>
+        <div id="categoryList" class="card-list"></div>
+      </section>
+
+      <section data-panel="services" class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow"><span></span> Website</p>
+            <h2>Services</h2>
+          </div>
+          <button class="button small" id="addService">Add service</button>
+        </div>
+        <div id="serviceList" class="card-list"></div>
+      </section>
+
+      <section data-panel="faqs" class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow"><span></span> Website</p>
+            <h2>FAQs</h2>
+          </div>
+          <button class="button small" id="addFaq">Add FAQ</button>
+        </div>
+        <div id="faqList" class="card-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modal"><section class="modal"><button class="modal-close" id="modalClose">×</button><div id="modalContent"></div></section></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
