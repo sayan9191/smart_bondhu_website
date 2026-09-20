@@ -43,16 +43,30 @@ async function boot(){
   }
 }
 
+const ADMIN_USERNAME='SmartBondhu@2026';
+const ADMIN_PASSWORD='Admin@2026';
+const ADMIN_EMAIL='admin@smartbondhu.in';
+
 document.getElementById('authSubmit').onclick=async()=>{
   if(!sb)return;
-  const email=document.getElementById('authEmail').value.trim();
+  const username=document.getElementById('authEmail').value.trim();
   const password=document.getElementById('authPassword').value;
   authError.hidden=true;
-  if(!email||!password)return showErr('Enter email and password.');
+  if(!username||!password)return showErr('Enter username and password.');
+  if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return showErr('Wrong username or password.');
   const fn=setupMode?'signUp':'signInWithPassword';
-  const {error}=await sb.auth[fn]({email,password});
-  if(error)return showErr(error.message);
-  if(setupMode)showErr('Account created. If email confirmation is on, confirm it, then sign in.');
+  const {error}=await sb.auth[fn]({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
+  if(error){
+    if(String(error.message||'').toLowerCase().includes('not confirmed')){
+      return showErr('Confirm admin@smartbondhu.in in Supabase Authentication → Users, or turn off Confirm email, then try again.');
+    }
+    if(setupMode||/already|registered|exists/i.test(error.message||'')){
+      const retry=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
+      if(retry.error)return showErr(retry.error.message);
+    }else{
+      return showErr(error.message);
+    }
+  }
   const {data}=await sb.auth.getSession();
   if(data.session)enterApp();
   setupMode=false;
