@@ -34,11 +34,34 @@ let popular=FALLBACK_POPULAR.slice();
 let faqs=FALLBACK_FAQS.slice();
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function getSb(){
-  const cfg=window.SB_CONFIG||{};
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>resolve(true);
+    s.onerror=()=>reject(new Error(src));
+    document.head.appendChild(s);
+  });
+}
+async function getSb(){
+  if(!window.SB_CONFIG||!(window.SB_CONFIG.supabaseAnonKey||'').trim()||String(window.SB_CONFIG.supabaseAnonKey).startsWith('PASTE_')){
+    window.SB_CONFIG={
+      supabaseUrl:'https://fecohhbsklscltyixzru.supabase.co',
+      supabaseAnonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlY29oaGJza2xzY2x0eWl4enJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDg1MDksImV4cCI6MjEwNTMyNDUwOX0.LoauqH6LdxaxCCbv_orzRsc3Xdp4FANxJvO8N2-4l1k'
+    };
+  }
+  const cfg=window.SB_CONFIG;
   const key=(cfg.supabaseAnonKey||'').trim();
-  if(!cfg.supabaseUrl||!key||key.startsWith('PASTE_'))return null;
-  if(!window.supabase)return null;
+  if(!window.supabase){
+    const urls=[
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+      'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+    ];
+    for(const src of urls){
+      try{await loadScript(src);if(window.supabase)break}catch(e){}
+    }
+  }
+  if(!cfg.supabaseUrl||!key||!window.supabase)return null;
   if(!window._sb)window._sb=window.supabase.createClient(cfg.supabaseUrl,key);
   return window._sb;
 }
@@ -53,7 +76,7 @@ function renderSite(){
 }
 
 async function loadFromSupabase(){
-  const sb=getSb();
+  const sb=await getSb();
   if(!sb){renderSite();return}
   try{
     const [{data:cats},{data:svcs},{data:faqRows}]=await Promise.all([
@@ -133,19 +156,26 @@ async function submitEnquiry(){
   const phone=digitsOnly(document.getElementById('phone')?.value);
   const requirement=document.getElementById('requirement')?.value.trim()||'';
   const service=document.querySelector('.choice.selected')?.textContent.trim()||'General enquiry';
-  const sb=getSb();
+  const sb=await getSb();
   if(!sb){
-    alert('Enquiry could not be saved to Supabase. Add your project anon key in config.js, then submit again.');
+    alert('Could not connect to Smart Bondhu. Check your internet connection and try again.');
     return;
   }
   const enquiry_code='SB-'+Math.floor(100000+Math.random()*899999);
-  const {data,error}=await sb.from('enquiries').insert({enquiry_code,name,phone,service,requirement,status:'new'}).select('enquiry_code').single();
-  if(error){
-    alert('Could not save your enquiry in Supabase. Check that schema.sql was run, then try again.\n\n'+(error.message||''));
-    console.error(error);
-    return;
+  const payload={enquiry_code,name,phone,service,requirement,status:'new'};
+  let saved=enquiry_code;
+  const rpc=await sb.rpc('submit_enquiry',{p_name:name,p_phone:phone,p_service:service,p_requirement:requirement});
+  if(rpc.error){
+    const ins=await sb.from('enquiries').insert(payload);
+    if(ins.error){
+      alert('Could not save your enquiry.\n\n'+(rpc.error.message||ins.error.message||'Please try again.'));
+      console.error(rpc.error,ins.error);
+      return;
+    }
+  }else if(rpc.data){
+    saved=rpc.data;
   }
-  const id=data?.enquiry_code||enquiry_code;
+  const id=saved;
   openModal(`<p class="eyebrow"><span></span> Enquiry submitted</p><h2>Your enquiry is with <em>Smart Bondhu.</em></h2><p class="modal-sub">Thank you${name?', '+esc(name):''}! Our team will review your enquiry and contact you on ${esc(phone)} shortly.</p><div class="confirmation"><b>${esc(id)}</b><span>Your enquiry ID · save it to track your request</span></div><div class="service-detail"><div class="detail-meta"><span>${esc(service)}</span><span>Expected next step: Review & follow-up</span></div></div><div class="enquiry-brief"><b>Your requirement:</b><span>${esc(requirement)}</span></div><button class="button" onclick="closeModal()">Done <span>→</span></button>`);
 }
 
@@ -154,7 +184,7 @@ async function trackEnquiry(){
   const id=document.getElementById('trackId').value.trim();
   const phone=(document.getElementById('trackPhone')?.value||'').replace(/[\s-]/g,'');
   const out=document.getElementById('trackOutput');
-  const sb=getSb();
+  const sb=await getSb();
   if(sb&&id&&phone){
     const {data,error}=await sb.rpc('track_enquiry',{code:id,mobile:phone});
     if(!error&&data?.length){
