@@ -204,3 +204,5 @@ from (values
 ('Can I track my enquiry?','Yes. Use Track enquiry with your enquiry ID and mobile number to view the next expected action.',7)
 ) as v
 where not exists (select 1 from public.faqs);
+
+-- Also run supabase/fix-admin.sql so the admin panel can sign in without email confirmation.

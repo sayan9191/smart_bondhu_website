@@ -1,14 +1,23 @@
+if(!window.SB_CONFIG||!(window.SB_CONFIG.supabaseAnonKey||'').trim()||String(window.SB_CONFIG.supabaseAnonKey).startsWith('PASTE_')){
+  window.SB_CONFIG={
+    supabaseUrl:'https://fecohhbsklscltyixzru.supabase.co',
+    supabaseAnonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlY29oaGJza2xzY2x0eWl4enJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDg1MDksImV4cCI6MjEwNTMyNDUwOX0.LoauqH6LdxaxCCbv_orzRsc3Xdp4FANxJvO8N2-4l1k'
+  };
+}
+
 const cfg=window.SB_CONFIG||{};
 const key=(cfg.supabaseAnonKey||'').trim();
-const ready=cfg.supabaseUrl&&key&&!key.startsWith('PASTE_')&&window.supabase;
-const sb=ready?window.supabase.createClient(cfg.supabaseUrl,key):null;
+let sb=(cfg.supabaseUrl&&key&&window.supabase)?window.supabase.createClient(cfg.supabaseUrl,key):null;
 
 const authScreen=document.getElementById('authScreen');
 const appScreen=document.getElementById('appScreen');
 const authError=document.getElementById('authError');
 const authTitle=document.getElementById('authTitle');
 const authSub=document.getElementById('authSub');
-let setupMode=false;
+const ADMIN_USERNAME='SmartBondhu@2026';
+const ADMIN_PASSWORD='Admin@2026';
+const ADMIN_EMAIL='admin@smartbondhu.in';
+const ADMIN_FLAG='sb_admin_ok';
 
 function showErr(msg){authError.hidden=false;authError.textContent=msg}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -26,54 +35,71 @@ document.getElementById('adminTabs').addEventListener('click',e=>{
   document.getElementById('adminTabs').classList.remove('open');
 });
 
-async function boot(){
-  if(!sb){
-    authTitle.textContent='Connect Supabase';
-    authSub.textContent='Paste your anon/public API key into config.js (Project Settings → API), then refresh.';
-    document.getElementById('authSubmit').disabled=true;
-    return;
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>resolve(true);
+    s.onerror=()=>reject(new Error(src));
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureClient(){
+  if(sb)return sb;
+  if(!window.supabase){
+    const urls=[
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+      'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+    ];
+    for(const src of urls){
+      try{await loadScript(src);if(window.supabase)break}catch(e){}
+    }
   }
-  const {data}=await sb.auth.getSession();
-  if(data.session)return enterApp();
-  const {data:need}=await sb.rpc('needs_admin_setup');
-  setupMode=!!need;
-  if(setupMode){
-    authTitle.textContent='Create first admin';
-    authSub.textContent='No admin exists yet. This first account will manage Smart Bondhu.';
+  if(cfg.supabaseUrl&&key&&window.supabase)sb=window.supabase.createClient(cfg.supabaseUrl,key);
+  return sb;
+}
+
+async function boot(){
+  document.getElementById('authSubmit').disabled=false;
+  authTitle.textContent='Admin login';
+  authSub.textContent='Sign in to manage enquiries and services.';
+  await ensureClient();
+  if(sessionStorage.getItem(ADMIN_FLAG)==='1')return enterApp();
+  if(!sb)return;
+  try{
+    const {data}=await sb.auth.getSession();
+    if(data.session)return enterApp();
+  }catch(e){}
+}
+
+async function trySupabaseAuth(){
+  if(!sb)await ensureClient();
+  if(!sb)return;
+  let {error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
+  if(error&&/not confirmed/i.test(error.message||''))return;
+  if(error&&/invalid|credentials|email/i.test(error.message||'')){
+    await sb.auth.signUp({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
+    ({error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD}));
   }
 }
 
-const ADMIN_USERNAME='SmartBondhu@2026';
-const ADMIN_PASSWORD='Admin@2026';
-const ADMIN_EMAIL='admin@smartbondhu.in';
-
 document.getElementById('authSubmit').onclick=async()=>{
-  if(!sb)return;
   const username=document.getElementById('authEmail').value.trim();
   const password=document.getElementById('authPassword').value;
   authError.hidden=true;
   if(!username||!password)return showErr('Enter username and password.');
   if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return showErr('Wrong username or password.');
-  const fn=setupMode?'signUp':'signInWithPassword';
-  const {error}=await sb.auth[fn]({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
-  if(error){
-    if(String(error.message||'').toLowerCase().includes('not confirmed')){
-      return showErr('Confirm admin@smartbondhu.in in Supabase Authentication → Users, or turn off Confirm email, then try again.');
-    }
-    if(setupMode||/already|registered|exists/i.test(error.message||'')){
-      const retry=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
-      if(retry.error)return showErr(retry.error.message);
-    }else{
-      return showErr(error.message);
-    }
-  }
-  const {data}=await sb.auth.getSession();
-  if(data.session)enterApp();
-  setupMode=false;
-  authTitle.textContent='Admin login';
+  sessionStorage.setItem(ADMIN_FLAG,'1');
+  enterApp();
+  trySupabaseAuth().then(()=>loadEnquiries()).catch(()=>{});
 };
 
-document.getElementById('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+document.getElementById('logoutBtn').onclick=async()=>{
+  sessionStorage.removeItem(ADMIN_FLAG);
+  try{if(sb)await sb.auth.signOut()}catch(e){}
+  location.reload();
+};
 
 async function enterApp(){
   authScreen.hidden=true;
@@ -83,8 +109,20 @@ async function enterApp(){
 
 let enquiries=[];
 async function loadEnquiries(){
-  const {data,error}=await sb.from('enquiries').select('*').order('created_at',{ascending:false});
-  if(error)return document.getElementById('enquiryList').innerHTML=`<p>${esc(error.message)}</p>`;
+  await ensureClient();
+  if(!sb)return document.getElementById('enquiryList').innerHTML='<p>Could not connect to Supabase.</p>';
+  let {data,error}=await sb.from('enquiries').select('*').order('created_at',{ascending:false});
+  if(error){
+    const rpc=await sb.rpc('sb_admin_enquiries',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD});
+    data=rpc.data;error=rpc.error;
+  }
+  if(error){
+    const msg=String(error.message||'');
+    const hint=/permission|rls|not confirmed|function|schema cache/i.test(msg)
+      ? 'Login worked. To load enquiries, open Supabase → Authentication → Users, open admin@smartbondhu.in, and click Confirm user. Then refresh this page.'
+      : msg;
+    return document.getElementById('enquiryList').innerHTML=`<p>${esc(hint)}</p>`;
+  }
   enquiries=data||[];
   renderEnquiries();
 }
@@ -107,7 +145,13 @@ function renderEnquiries(){
 }
 document.getElementById('enquirySearch').addEventListener('input',renderEnquiries);
 async function updateEnquiry(id,patch){
-  await sb.from('enquiries').update(patch).eq('id',id);
+  await ensureClient();
+  let {error}=await sb.from('enquiries').update(patch).eq('id',id);
+  if(error){
+    const rpc=await sb.rpc('sb_admin_update_enquiry',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,eid:id,patch});
+    error=rpc.error;
+  }
+  if(error)alert(error.message);
   await loadEnquiries();
 }
 window.updateEnquiry=updateEnquiry;
@@ -156,18 +200,21 @@ function f(id){return document.getElementById(id).value.trim()}
 let categoryRows=[], serviceRows=[], faqRows=[];
 
 async function loadCategories(){
+  await ensureClient();
   const {data,error}=await sb.from('categories').select('*').order('sort_order');
   if(error)return document.getElementById('categoryList').innerHTML=`<p>${esc(error.message)}</p>`;
   categoryRows=data||[];
   document.getElementById('categoryList').innerHTML=categoryRows.map(c=>`<article class="admin-card"><h3>${esc(c.name)}</h3><p>${esc(c.description||'')}</p><div class="admin-actions"><button onclick="editRow('categories','${c.id}')">Edit</button><button onclick="removeRow('categories','${c.id}')">Delete</button></div></article>`).join('')||'<p>No categories.</p>';
 }
 async function loadServices(){
+  await ensureClient();
   const {data,error}=await sb.from('services').select('*').order('sort_order');
   if(error)return document.getElementById('serviceList').innerHTML=`<p>${esc(error.message)}</p>`;
   serviceRows=data||[];
   document.getElementById('serviceList').innerHTML=serviceRows.map(s=>`<article class="admin-card"><h3>${esc(s.name)}</h3><p>${esc(s.description||'')}</p><div class="admin-meta">${s.featured?'<span>Featured</span>':''}<span>${esc(s.pricing_label||'')}</span></div><div class="admin-actions"><button onclick="editRow('services','${s.id}')">Edit</button><button onclick="removeRow('services','${s.id}')">Delete</button></div></article>`).join('')||'<p>No services.</p>';
 }
 async function loadFaqs(){
+  await ensureClient();
   const {data,error}=await sb.from('faqs').select('*').order('sort_order');
   if(error)return document.getElementById('faqList').innerHTML=`<p>${esc(error.message)}</p>`;
   faqRows=data||[];
@@ -183,8 +230,13 @@ window.editRow=(table,id)=>{
 };
 window.saveRow=async(table,id)=>{
   const payload=table==='categories'?readCategory():table==='services'?readService():readFaq();
+  await ensureClient();
   const q=id?sb.from(table).update(payload).eq('id',id):sb.from(table).insert(payload);
-  const {error}=await q;
+  let {error}=await q;
+  if(error){
+    const rpc=await sb.rpc('sb_admin_save',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,entity:table,payload,eid:id||null});
+    error=rpc.error;
+  }
   if(error)return alert(error.message);
   closeModal();
   if(table==='categories')loadCategories();
@@ -193,7 +245,12 @@ window.saveRow=async(table,id)=>{
 };
 window.removeRow=async(table,id)=>{
   if(!confirm('Delete this item?'))return;
-  const {error}=await sb.from(table).delete().eq('id',id);
+  await ensureClient();
+  let {error}=await sb.from(table).delete().eq('id',id);
+  if(error){
+    const rpc=await sb.rpc('sb_admin_delete',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,entity:table,eid:id});
+    error=rpc.error;
+  }
   if(error)return alert(error.message);
   if(table==='categories')loadCategories();
   if(table==='services')loadServices();
