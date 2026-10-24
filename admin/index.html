@@ -33,6 +33,7 @@
       <button class="menu" id="adminMenuBtn" aria-label="Open menu">☰</button>
       <nav class="admin-tabs" id="adminTabs">
         <button data-tab="enquiries" class="on">Enquiries</button>
+        <button data-tab="deletions">Deletion requests</button>
         <button data-tab="categories">Categories</button>
         <button data-tab="services">Services</button>
         <button data-tab="faqs">FAQs</button>
@@ -50,6 +51,18 @@
           <input id="enquirySearch" placeholder="Search name, phone, ID…" />
         </div>
         <div id="enquiryList" class="card-list"></div>
+      </section>
+
+      <section data-panel="deletions" class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow"><span></span> Privacy</p>
+            <h2>Deletion requests</h2>
+          </div>
+          <input id="deletionSearch" placeholder="Search name, phone, ID…" />
+        </div>
+        <p class="modal-sub">Confirm with the customer by phone first, then delete their data in the app backend and mark the request completed within 30 days.</p>
+        <div id="deletionList" class="card-list"></div>
       </section>
 
       <section data-panel="categories" class="panel">

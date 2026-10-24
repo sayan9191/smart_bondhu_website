@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Request deletion of your Smart Bondhu account and personal data." />
+  <title>Delete Account | Smart Bondhu</title>
+  <link rel="canonical" href="https://smartbondhu.in/delete-account.html" />
+  <link rel="icon" href="assets/smart-bondhu-logo.jpeg" type="image/jpeg" />
+  <link rel="apple-touch-icon" href="assets/smart-bondhu-logo.jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .da-wrap{max-width:1040px;margin:0 auto;padding:56px 24px 80px;display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}
+    .da-intro h1{font-size:clamp(34px,5vw,52px);margin:14px 0 14px}
+    .da-intro>p{font-size:16px;line-height:1.7;color:#3d5a4f;margin:0 0 14px}
+    .back-link{display:inline-flex;gap:8px;color:var(--green);font-weight:700;font-size:14px;margin-bottom:20px}
+    .da-box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:18px}
+    .da-box h2{font-size:18px!important;letter-spacing:-.02em;margin-bottom:8px}
+    .da-box ul,.da-box ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14.5px;line-height:1.6;color:#33504a}
+    .da-box a{color:var(--green);font-weight:600;text-decoration:underline}
+    .da-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;box-shadow:0 14px 34px rgba(19,50,35,.08)}
+    .da-card h2{font-size:26px!important;margin-bottom:6px}
+    .da-card .sub{color:var(--muted);font-size:14px;margin:0 0 6px}
+    .da-card label{display:block;font-size:13px;font-weight:700;margin:16px 0 6px}
+    .da-card label small{font-weight:500;color:var(--muted)}
+    .da-card input[type=text],.da-card input[type=tel],.da-card input[type=email],.da-card textarea{width:100%;border:1px solid #cfdccf;border-radius:7px;padding:12px;font:inherit;font-size:15px;background:#fbfbf7}
+    .da-card input:focus,.da-card textarea:focus{outline:2px solid rgba(31,107,74,.25);border-color:var(--green)}
+    .da-card textarea{height:88px;resize:vertical}
+    .phone-row{display:flex;align-items:stretch}
+    .phone-row span{display:flex;align-items:center;padding:0 12px;border:1px solid #cfdccf;border-right:0;border-radius:7px 0 0 7px;background:var(--mist);font-weight:700;font-size:14px}
+    .phone-row input{border-radius:0 7px 7px 0!important}
+    .scope{display:grid;gap:8px}
+    .scope label{display:flex;gap:10px;align-items:flex-start;margin:0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-weight:500;font-size:14px;cursor:pointer;background:#fbfbf7}
+    .scope label:has(input:checked){border-color:var(--green);background:var(--mist)}
+    .scope b{display:block;font-size:14.5px}
+    .scope input{margin-top:3px;accent-color:var(--green)}
+    .confirm{display:flex!important;gap:10px;align-items:flex-start;font-weight:500!important;font-size:13.5px!important;line-height:1.5;color:#3d5a4f}
+    .confirm input{margin-top:3px;accent-color:var(--green)}
+    .da-error{background:#fdecea;color:#9b2c20;border-radius:7px;padding:10px 12px;font-size:14px;margin-top:14px}
+    .da-submit{width:100%;margin-top:20px;background:#b23a2c;box-shadow:0 7px 16px rgba(178,58,44,.18)}
+    .da-submit:hover{background:#8f2c20}
+    .da-submit:disabled{opacity:.6;cursor:wait;transform:none}
+    .da-success{text-align:center}
+    .da-success .code{display:inline-block;font:800 30px Manrope,sans-serif;color:var(--green);background:var(--mist);border-radius:10px;padding:10px 18px;margin:12px 0;letter-spacing:.04em}
+    .da-success p{font-size:15px;line-height:1.65;color:#3d5a4f}
+    .da-check{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+    .da-check summary{font-weight:700;cursor:pointer;font-size:14px}
+    .da-check .row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px}
+    .da-check .row input{width:100%;border:1px solid #cfdccf;border-radius:7px;padding:10px;font:inherit;font-size:14px}
+    .da-check .row button{background:var(--ink);color:#fff;border-radius:7px;padding:0 14px;font-weight:700;font-size:13px}
+    .da-status{margin-top:12px;font-size:14px;background:var(--mist);border-radius:7px;padding:12px}
+    .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+    @media(max-width:860px){.da-wrap{grid-template-columns:1fr;gap:28px;padding-top:36px}.da-card{padding:22px 18px}.da-check .row{grid-template-columns:1fr}.da-check .row button{padding:11px}}
+  </style>
+</head>
+<body>
+  <div class="topline"><span>Smart help for everyday living</span><span class="topline-right"><a href="tel:+918910754862">+91 89107 54862</a></span></div>
+  <header class="nav" id="nav">
+    <a class="brand" href="index.html" aria-label="Smart Bondhu home"><img class="official-logo" src="assets/smart-bondhu-logo.jpeg" alt="Smart Bondhu logo" /><span><b>SMART</b> BONDHU<small>Together for a better tomorrow</small></span></a>
+    <nav class="desktop-nav"><a href="index.html#services">Services</a><a href="index.html#how">How it works</a><a href="privacy-policy.html">Privacy Policy</a></nav>
+    <div class="nav-actions"><a class="button small" href="index.html">Back to website <span>→</span></a></div>
+    <button class="menu" aria-label="Open menu" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
+  </header>
+  <div class="mobile-menu" id="mobileMenu"><a href="index.html">Home</a><a href="index.html#services">Services</a><a href="privacy-policy.html">Privacy Policy</a><a href="tel:+918910754862">Call +91 89107 54862</a></div>
+
+  <main class="da-wrap">
+    <section class="da-intro">
+      <a class="back-link" href="privacy-policy.html">← Privacy Policy</a>
+      <p class="eyebrow"><span></span> Your data, your choice</p>
+      <h1>Delete your Smart Bondhu account</h1>
+      <p>Use this form to ask us to delete your <strong>Smart Bondhu</strong> app account and the personal data linked to it. It's free, and you don't need to have the app installed.</p>
+      <p>Use the mobile number you signed up with so we can find and verify your account.</p>
+
+      <div class="da-box">
+        <h2>What happens next</h2>
+        <ol>
+          <li>You get a request ID straight away.</li>
+          <li>We call you or send a code to your registered number to confirm it's really you.</li>
+          <li>Your data is deleted within <strong>30 days</strong>, and we let you know when it's done.</li>
+        </ol>
+      </div>
+      <div class="da-box">
+        <h2>What gets deleted</h2>
+        <ul>
+          <li>Your profile: name, mobile number, email and photo</li>
+          <li>Saved addresses and location details</li>
+          <li>Photos you uploaded and your enquiry history</li>
+          <li>Notification tokens linked to your devices</li>
+        </ul>
+      </div>
+      <div class="da-box">
+        <h2>What we may keep</h2>
+        <ul>
+          <li>Invoices and payment records that Indian tax law requires us to keep, for up to 8 years</li>
+          <li>Records needed to settle an open dispute or prevent fraud</li>
+        </ul>
+        <p style="font-size:14px;color:#3d5a4f;margin:10px 0 0">These are stored securely and deleted once they're no longer needed. See our <a href="privacy-policy.html#storage">Privacy Policy</a>.</p>
+      </div>
+    </section>
+
+    <section class="da-card" aria-live="polite">
+      <div id="formView">
+        <h2>Request deletion</h2>
+        <p class="sub">Fields marked * are required.</p>
+        <form id="delForm" novalidate>
+          <label for="dName">Full name *</label>
+          <input id="dName" type="text" autocomplete="name" maxlength="100" required />
+
+          <label for="dPhone">Registered mobile number *</label>
+          <div class="phone-row"><span>+91</span><input id="dPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" placeholder="10-digit number" required /></div>
+
+          <label for="dEmail">Email <small>(optional — if you signed in with Google)</small></label>
+          <input id="dEmail" type="email" autocomplete="email" maxlength="254" />
+
+          <label>What would you like deleted? *</label>
+          <div class="scope">
+            <label><input type="radio" name="scope" value="account" checked /><span><b>My whole account and data</b>Close the account and delete everything listed on this page.</span></label>
+            <label><input type="radio" name="scope" value="data" /><span><b>Only some of my data</b>Keep the account, but remove specific data (tell us below).</span></label>
+          </div>
+
+          <label for="dReason">Anything else we should know? <small>(optional)</small></label>
+          <textarea id="dReason" maxlength="1000" placeholder="e.g. which data to remove, or why you're leaving"></textarea>
+
+          <div class="hp" aria-hidden="true"><label for="dWebsite">Website</label><input id="dWebsite" type="text" tabindex="-1" autocomplete="off" /></div>
+
+          <label class="confirm"><input id="dConfirm" type="checkbox" /> <span>I understand that deleting my account is permanent and my bookings, saved addresses and history can't be recovered.</span></label>
+
+          <div id="dError" class="da-error" hidden></div>
+          <button class="button da-submit" type="submit" id="dSubmit">Submit deletion request</button>
+        </form>
+      </div>
+
+      <div id="doneView" class="da-success" hidden>
+        <p class="eyebrow" style="justify-content:center"><span></span> Request received</p>
+        <h2>We've got your request</h2>
+        <div class="code" id="doneCode"></div>
+        <p>Save this request ID. We'll contact you on <b id="donePhone"></b> to confirm, then delete your data within 30 days.</p>
+        <p style="font-size:14px">Questions? Email <a href="mailto:support@smartbondhu.com" style="color:var(--green);font-weight:600">support@smartbondhu.com</a> or call <a href="tel:+918910754862" style="color:var(--green);font-weight:600">+91 89107 54862</a>.</p>
+      </div>
+
+      <details class="da-check" id="checkBox">
+        <summary>Already sent a request? Check its status</summary>
+        <form class="row" id="checkForm">
+          <input id="cCode" type="text" placeholder="Request ID (DEL-… or SB-…)" aria-label="Request ID" />
+          <input id="cPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile number" aria-label="Mobile number" />
+          <button type="submit">Check</button>
+        </form>
+        <div id="cResult" class="da-status" hidden></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-top">
+      <a class="brand inverse" href="index.html"><img class="official-logo" src="assets/smart-bondhu-logo.jpeg" alt="Smart Bondhu logo" /><span><b>SMART</b> BONDHU<small>Together for a better tomorrow</small></span></a>
+      <p>Smart help for every part of home and everyday life.</p>
+    </div>
+    <div class="footer-links">
+      <div><b>Company</b><a href="index.html#about">About</a><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete account</a></div>
+      <div><b>Discover</b><a href="index.html#services">Services</a><a href="index.html#how">How it works</a><a href="index.html#faq">FAQs</a></div>
+      <div><b>Support</b><a href="mailto:support@smartbondhu.com">support@smartbondhu.com</a><a href="tel:+918910754862">Call +91 89107 54862</a></div>
+      <div><b>Contact</b><a class="footer-address" href="https://maps.google.com/?q=Samali+Ghosh+Para+Nahazari+Bishnupur+Kolkata+700104" target="_blank" rel="noopener">Samali Ghosh Para, P.O. Nahazari<br>P.S. Bishnupur, Kolkata<br>West Bengal — 700104</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 Smart Bondhu. Together for a better tomorrow. <span class="maintained">Website designed &amp; maintained by <a class="credit-link" href="https://www.infusedbyte.com" target="_blank" rel="noopener noreferrer"><b>InfusedByte</b></a></span></div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script>
+  (function(){
+    var cfg = window.SB_CONFIG || {};
+    var FALLBACK = 'Something went wrong. Please try again, or email support@smartbondhu.com with the subject "Delete my account".';
+
+    function rpc(fn, body){
+      return fetch(cfg.supabaseUrl + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: cfg.supabaseAnonKey, Authorization: 'Bearer ' + cfg.supabaseAnonKey },
+        body: JSON.stringify(body)
+      }).then(function(r){
+        return r.json().catch(function(){ return null; }).then(function(data){
+          if (!r.ok) {
+            var msg = data && data.message ? data.message : '';
+            // Show our own validation messages; hide technical ones.
+            var e = new Error(/^Please |^Invalid request|too long/.test(msg) ? msg : FALLBACK);
+            e.missing = r.status === 404 || /^PGRST20[25]$/.test(data && data.code || '');
+            throw e;
+          }
+          return data;
+        });
+      });
+    }
+    function digits(v){ var d = String(v || '').replace(/\D/g, ''); return d.length === 12 && d.indexOf('91') === 0 ? d.slice(2) : d; }
+    function $(id){ return document.getElementById(id); }
+    function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+    var err = $('dError');
+    function showErr(m){ err.textContent = m; err.hidden = false; }
+
+    $('delForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      err.hidden = true;
+      if ($('dWebsite').value) return; // bot trap
+      var name = $('dName').value.trim();
+      var phone = digits($('dPhone').value);
+      var email = $('dEmail').value.trim();
+      var scope = (document.querySelector('input[name=scope]:checked') || {}).value || 'account';
+      var reason = $('dReason').value.trim();
+      if (!name) return showErr('Please enter your name.');
+      if (!/^[6-9]\d{9}$/.test(phone)) return showErr('Please enter a valid 10-digit mobile number.');
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr('Please enter a valid email address.');
+      if (!$('dConfirm').checked) return showErr('Please tick the box to confirm you understand.');
+      if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return showErr(FALLBACK);
+
+      var btn = $('dSubmit');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      rpc('submit_deletion_request', { p_name: name, p_phone: phone, p_email: email || null, p_scope: scope, p_reason: reason || null })
+        .catch(function(ex){
+          // Deletion API not reachable yet: save through the enquiry system instead.
+          if (!ex.missing) throw ex;
+          var details = 'ACCOUNT DELETION REQUEST — ' + (scope === 'data' ? 'delete some data only' : 'delete whole account and data') +
+            (email ? '\nEmail: ' + email : '') + (reason ? '\nDetails: ' + reason : '');
+          return rpc('submit_enquiry', { p_name: name, p_phone: phone, p_service: 'Account deletion request', p_requirement: details });
+        })
+        .then(function(code){
+          $('doneCode').textContent = code;
+          $('donePhone').textContent = '+91 ' + phone;
+          $('cCode').value = code; $('cPhone').value = phone;
+          $('formView').hidden = true; $('doneView').hidden = false;
+          window.scrollTo({ top: $('doneView').getBoundingClientRect().top + scrollY - 120, behavior: 'smooth' });
+        })
+        .catch(function(ex){ showErr(ex.message || FALLBACK); })
+        .then(function(){ btn.disabled = false; btn.textContent = 'Submit deletion request'; });
+    });
+
+    var LABELS = { new: 'Received — we will contact you to confirm', verifying: 'Verifying your identity', in_review: 'Verifying your identity', contacted: 'Verifying your identity', completed: 'Completed — your data has been deleted', closed: 'Completed — your data has been deleted', rejected: 'Closed — please contact support' };
+    $('checkForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      var out = $('cResult');
+      var code = $('cCode').value.trim(), phone = digits($('cPhone').value);
+      out.hidden = false;
+      if (!code || !/^[6-9]\d{9}$/.test(phone)) { out.textContent = 'Enter your request ID and 10-digit mobile number.'; return; }
+      out.textContent = 'Checking…';
+      var isEnquiry = /^SB-/i.test(code);
+      (isEnquiry ? rpc('track_enquiry', { code: code.toUpperCase(), mobile: phone }) : rpc('check_deletion_request', { p_code: code, p_phone: phone })).then(function(rows){
+        var r = rows && rows[0];
+        if (r && isEnquiry) r = { request_code: r.enquiry_code, status: r.status, created_at: r.created_at };
+        if (!r) { out.textContent = 'No request found with that ID and mobile number.'; return; }
+        out.innerHTML = '<b>' + esc(r.request_code) + '</b> · ' + esc(LABELS[r.status] || r.status) +
+          '<br><small>Submitted ' + esc(new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })) +
+          (r.completed_at ? ' · Completed ' + esc(new Date(r.completed_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })) : '') + '</small>';
+      }).catch(function(ex){ out.textContent = ex.message || FALLBACK; });
+    });
+  })();
+  </script>
+</body>
+</html>

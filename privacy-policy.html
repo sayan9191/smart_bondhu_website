@@ -25,7 +25,7 @@
     .legal-toc a{color:var(--green)}
     .legal-content{max-width:860px;margin:0 auto;padding:24px 24px 80px;display:flex;flex-direction:column;gap:36px}
     .legal-section{scroll-margin-top:90px}
-    .legal-section h2{font-size:clamp(22px,3vw,28px);letter-spacing:-.03em;margin-bottom:12px}
+    .legal-section h2{font-size:clamp(22px,3vw,28px)!important;letter-spacing:-.03em;margin-bottom:12px}
     .legal-section h3{font:700 17px Manrope,sans-serif;margin:22px 0 8px}
     .legal-section p,.legal-section li{font-size:16px;line-height:1.7;color:#24423a}
     .legal-section p{margin:0 0 12px}
@@ -48,7 +48,7 @@
     <div class="nav-actions"><a class="button small" href="index.html">Back to website <span>→</span></a></div>
     <button class="menu" aria-label="Open menu" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
   </header>
-  <div class="mobile-menu" id="mobileMenu"><a href="index.html">Home</a><a href="index.html#services">Services</a><a href="index.html#how">How it works</a><a href="#delete-account">Delete my account</a><a href="#contact">Contact us</a></div>
+  <div class="mobile-menu" id="mobileMenu"><a href="index.html">Home</a><a href="index.html#services">Services</a><a href="index.html#how">How it works</a><a href="delete-account.html">Delete my account</a><a href="#contact">Contact us</a></div>
 
   <main>
     <section class="legal-hero">
@@ -214,9 +214,9 @@
         <h2>10. Delete your account and data</h2>
         <div class="callout">
           <p>You can ask Smart Bondhu to delete your account and the personal data linked to it at any time, free of charge.</p>
+          <p><a class="button" href="delete-account.html" style="color:#fff;text-decoration:none;display:inline-block">Request account deletion →</a></p>
           <ol>
-            <li>Email <a href="mailto:support@smartbondhu.com?subject=Delete%20my%20Smart%20Bondhu%20account">support@smartbondhu.com</a> with the subject <strong>"Delete my account"</strong>, or call <a href="tel:+918910754862">+91 89107 54862</a>.</li>
-            <li>Tell us the mobile number (or Google email) registered with your account.</li>
+            <li>Fill in the <a href="delete-account.html">account deletion form</a> with your name and the mobile number registered with your account. You will get a request ID straight away. You can also email <a href="mailto:support@smartbondhu.com?subject=Delete%20my%20Smart%20Bondhu%20account">support@smartbondhu.com</a> with the subject <strong>"Delete my account"</strong>, or call <a href="tel:+918910754862">+91 89107 54862</a>.</li>
             <li>We will confirm the request with you, for example by calling or sending a code to that number.</li>
             <li>Your account will be closed and your data deleted within 30 days. We will let you know when it is done.</li>
           </ol>
@@ -255,7 +255,7 @@
       <p>Smart help for every part of home and everyday life.</p>
     </div>
     <div class="footer-links">
-      <div><b>Company</b><a href="index.html#about">About</a><a href="privacy-policy.html">Privacy Policy</a><a href="privacy-policy.html#delete-account">Delete account</a></div>
+      <div><b>Company</b><a href="index.html#about">About</a><a href="privacy-policy.html">Privacy Policy</a><a href="delete-account.html">Delete account</a></div>
       <div><b>Discover</b><a href="index.html#services">Services</a><a href="index.html#how">How it works</a><a href="index.html#faq">FAQs</a></div>
       <div><b>Support</b><a href="mailto:support@smartbondhu.com">support@smartbondhu.com</a><a href="tel:+918910754862">Call +91 89107 54862</a></div>
       <div><b>Contact</b><a class="footer-address" href="https://maps.google.com/?q=Samali+Ghosh+Para+Nahazari+Bishnupur+Kolkata+700104" target="_blank" rel="noopener">Samali Ghosh Para, P.O. Nahazari<br>P.S. Bishnupur, Kolkata<br>West Bengal — 700104</a></div>

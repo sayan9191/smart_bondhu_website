@@ -92,7 +92,7 @@ document.getElementById('authSubmit').onclick=async()=>{
   if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return showErr('Wrong username or password.');
   sessionStorage.setItem(ADMIN_FLAG,'1');
   enterApp();
-  trySupabaseAuth().then(()=>loadEnquiries()).catch(()=>{});
+  trySupabaseAuth().then(()=>Promise.all([loadEnquiries(),loadDeletions()])).catch(()=>{});
 };
 
 document.getElementById('logoutBtn').onclick=async()=>{
@@ -104,8 +104,63 @@ document.getElementById('logoutBtn').onclick=async()=>{
 async function enterApp(){
   authScreen.hidden=true;
   appScreen.hidden=false;
-  await Promise.all([loadEnquiries(),loadCategories(),loadServices(),loadFaqs()]);
+  await Promise.all([loadEnquiries(),loadDeletions(),loadCategories(),loadServices(),loadFaqs()]);
 }
+
+let deletions=[];
+async function loadDeletions(){
+  await ensureClient();
+  const box=document.getElementById('deletionList');
+  if(!sb)return box.innerHTML='<p>Could not connect to Supabase.</p>';
+  let {data,error}=await sb.from('deletion_requests').select('*').order('created_at',{ascending:false});
+  if(error){
+    const rpc=await sb.rpc('sb_admin_deletion_requests',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD});
+    data=rpc.data;error=rpc.error;
+  }
+  if(error)return box.innerHTML=`<p>${esc(/schema cache|does not exist|function/i.test(error.message||'')?'The deletion-requests database is not reachable yet, so new requests are arriving in the Enquiries tab as "Account deletion request". They will appear here automatically once it is available.':error.message)}</p>`;
+  deletions=data||[];
+  renderDeletions();
+}
+function renderDeletions(){
+  const q=(document.getElementById('deletionSearch').value||'').toLowerCase();
+  const rows=deletions.filter(d=>[d.name,d.phone,d.email,d.request_code,d.reason].join(' ').toLowerCase().includes(q));
+  const tab=document.querySelector('[data-tab="deletions"]');
+  const open=deletions.filter(d=>d.status==='new'||d.status==='verifying').length;
+  if(tab)tab.textContent=open?`Deletion requests (${open})`:'Deletion requests';
+  document.getElementById('deletionList').innerHTML=rows.length?rows.map(d=>{
+    const due=new Date(new Date(d.created_at).getTime()+30*864e5);
+    const overdue=(d.status==='new'||d.status==='verifying')&&due<new Date();
+    return `<article class="admin-card">
+    <h3>${esc(d.name)} · ${esc(d.request_code)}</h3>
+    <div class="admin-meta"><span>${esc(d.phone)}</span>${d.email?`<span>${esc(d.email)}</span>`:''}<span>${d.scope==='data'?'Some data only':'Whole account'}</span><span class="status ${esc(d.status)}">${esc(d.status)}</span><span>${new Date(d.created_at).toLocaleString()}</span>${d.completed_at?`<span>Done ${new Date(d.completed_at).toLocaleDateString()}</span>`:`<span${overdue?' style="color:#b23a2c;font-weight:700"':''}>Due by ${due.toLocaleDateString()}</span>`}</div>
+    ${d.reason?`<p>${esc(d.reason)}</p>`:''}
+    ${d.notes?`<p><b>Notes:</b> ${esc(d.notes)}</p>`:''}
+    <div class="admin-actions">
+      <select onchange="updateDeletion('${d.id}',{status:this.value})">
+        ${['new','verifying','completed','rejected'].map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <button onclick="noteDeletion('${d.id}')">Add note</button>
+      <a class="button small" href="tel:${esc(d.phone)}">Call</a>
+    </div>
+  </article>`}).join(''):'<p>No deletion requests.</p>';
+}
+document.getElementById('deletionSearch').addEventListener('input',renderDeletions);
+async function updateDeletion(id,patch){
+  await ensureClient();
+  if(patch.status==='completed'&&!confirm('Mark as completed? Only do this after the customer\'s data has been deleted.'))return loadDeletions();
+  let {error}=await sb.rpc('sb_admin_update_deletion_request',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,rid:id,patch});
+  if(error)alert(error.message);
+  await loadDeletions();
+}
+window.updateDeletion=updateDeletion;
+window.noteDeletion=id=>{
+  const cur=deletions.find(x=>x.id===id);
+  openModal(`<div class="admin-form"><h2>Internal note</h2><textarea id="delNoteVal">${esc(cur?.notes||'')}</textarea><div class="form-actions"><button class="button" onclick="saveDeletionNote('${id}')">Save</button></div></div>`);
+};
+window.saveDeletionNote=async id=>{
+  await updateDeletion(id,{notes:document.getElementById('delNoteVal').value});
+  closeModal();
+};
 
 let enquiries=[];
 async function loadEnquiries(){
