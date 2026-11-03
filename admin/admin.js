@@ -14,12 +14,12 @@ const appScreen=document.getElementById('appScreen');
 const authError=document.getElementById('authError');
 const authTitle=document.getElementById('authTitle');
 const authSub=document.getElementById('authSub');
-const ADMIN_USERNAME='SmartBondhu@2026';
-const ADMIN_PASSWORD='Admin@2026';
-const ADMIN_EMAIL='admin@smartbondhu.in';
-const ADMIN_FLAG='sb_admin_ok';
 
-// Storage bucket that holds category/service images (see supabase-catalog-images-setup.sql).
+// Default sign-in email (just a convenience prefill — the real check is the
+// Supabase Auth password, which is NEVER stored in this file).
+const ADMIN_EMAIL='admin@smartbondhu.in';
+
+// Storage bucket that holds category/service images.
 const IMAGE_BUCKET='catalog-images';
 
 function showErr(msg){authError.hidden=false;authError.textContent=msg}
@@ -67,8 +67,9 @@ async function boot(){
   document.getElementById('authSubmit').disabled=false;
   authTitle.textContent='Admin login';
   authSub.textContent='Sign in to manage enquiries and services.';
+  const emailField=document.getElementById('authEmail');
+  if(emailField&&!emailField.value)emailField.value=ADMIN_EMAIL;
   await ensureClient();
-  if(sessionStorage.getItem(ADMIN_FLAG)==='1')return enterApp();
   if(!sb)return;
   try{
     const {data}=await sb.auth.getSession();
@@ -76,30 +77,28 @@ async function boot(){
   }catch(e){}
 }
 
-async function trySupabaseAuth(){
-  if(!sb)await ensureClient();
-  if(!sb)return;
-  let {error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
-  if(error&&/not confirmed/i.test(error.message||''))return;
-  if(error&&/invalid|credentials|email/i.test(error.message||'')){
-    await sb.auth.signUp({email:ADMIN_EMAIL,password:ADMIN_PASSWORD});
-    ({error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:ADMIN_PASSWORD}));
-  }
-}
-
+// Real Supabase Auth sign-in. The password is typed by the admin and sent
+// straight to Supabase — it is never kept in this file or in the page.
 document.getElementById('authSubmit').onclick=async()=>{
-  const username=document.getElementById('authEmail').value.trim();
+  const email=document.getElementById('authEmail').value.trim();
   const password=document.getElementById('authPassword').value;
   authError.hidden=true;
-  if(!username||!password)return showErr('Enter username and password.');
-  if(username!==ADMIN_USERNAME||password!==ADMIN_PASSWORD)return showErr('Wrong username or password.');
-  sessionStorage.setItem(ADMIN_FLAG,'1');
+  if(!email||!password)return showErr('Enter your email and password.');
+  const btn=document.getElementById('authSubmit');
+  btn.disabled=true;
+  await ensureClient();
+  if(!sb){btn.disabled=false;return showErr('Could not connect. Please try again.');}
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  btn.disabled=false;
+  if(error){
+    if(/confirm/i.test(error.message||''))return showErr('This account’s email is not confirmed yet.');
+    return showErr('Wrong email or password.');
+  }
+  document.getElementById('authPassword').value='';
   enterApp();
-  trySupabaseAuth().then(()=>Promise.all([loadEnquiries(),loadDeletions()])).catch(()=>{});
 };
 
 document.getElementById('logoutBtn').onclick=async()=>{
-  sessionStorage.removeItem(ADMIN_FLAG);
   try{if(sb)await sb.auth.signOut()}catch(e){}
   location.reload();
 };
@@ -110,17 +109,20 @@ async function enterApp(){
   await Promise.all([loadEnquiries(),loadDeletions(),loadCategories(),loadServices(),loadFaqs()]);
 }
 
+function notAdminHint(error){
+  const msg=String(error&&error.message||'');
+  if(/permission|rls|policy|denied/i.test(msg))
+    return 'You are signed in, but this account is not marked as an admin for this project.';
+  return msg||'Could not load.';
+}
+
 let deletions=[];
 async function loadDeletions(){
   await ensureClient();
   const box=document.getElementById('deletionList');
   if(!sb)return box.innerHTML='<p>Could not connect to Supabase.</p>';
-  let {data,error}=await sb.from('deletion_requests').select('*').order('created_at',{ascending:false});
-  if(error){
-    const rpc=await sb.rpc('sb_admin_deletion_requests',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD});
-    data=rpc.data;error=rpc.error;
-  }
-  if(error)return box.innerHTML=`<p>${esc(/schema cache|does not exist|function/i.test(error.message||'')?'The deletion-requests database is not reachable yet, so new requests are arriving in the Enquiries tab as "Account deletion request". They will appear here automatically once it is available.':error.message)}</p>`;
+  const {data,error}=await sb.from('deletion_requests').select('*').order('created_at',{ascending:false});
+  if(error)return box.innerHTML=`<p>${esc(/schema cache|does not exist|relation|not find/i.test(error.message||'')?'The deletion-requests table is not set up in this project yet. New requests are arriving in the Enquiries tab.':notAdminHint(error))}</p>`;
   deletions=data||[];
   renderDeletions();
 }
@@ -151,7 +153,7 @@ document.getElementById('deletionSearch').addEventListener('input',renderDeletio
 async function updateDeletion(id,patch){
   await ensureClient();
   if(patch.status==='completed'&&!confirm('Mark as completed? Only do this after the customer\'s data has been deleted.'))return loadDeletions();
-  let {error}=await sb.rpc('sb_admin_update_deletion_request',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,rid:id,patch});
+  const {error}=await sb.from('deletion_requests').update(patch).eq('id',id);
   if(error)alert(error.message);
   await loadDeletions();
 }
@@ -168,19 +170,10 @@ window.saveDeletionNote=async id=>{
 let enquiries=[];
 async function loadEnquiries(){
   await ensureClient();
-  if(!sb)return document.getElementById('enquiryList').innerHTML='<p>Could not connect to Supabase.</p>';
-  let {data,error}=await sb.from('enquiries').select('*').order('created_at',{ascending:false});
-  if(error){
-    const rpc=await sb.rpc('sb_admin_enquiries',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD});
-    data=rpc.data;error=rpc.error;
-  }
-  if(error){
-    const msg=String(error.message||'');
-    const hint=/permission|rls|not confirmed|function|schema cache/i.test(msg)
-      ? 'Login worked. To load enquiries, open Supabase → Authentication → Users, open admin@smartbondhu.in, and click Confirm user. Then refresh this page.'
-      : msg;
-    return document.getElementById('enquiryList').innerHTML=`<p>${esc(hint)}</p>`;
-  }
+  const list=document.getElementById('enquiryList');
+  if(!sb)return list.innerHTML='<p>Could not connect to Supabase.</p>';
+  const {data,error}=await sb.from('enquiries').select('*').order('created_at',{ascending:false});
+  if(error)return list.innerHTML=`<p>${esc(notAdminHint(error))}</p>`;
   enquiries=data||[];
   renderEnquiries();
 }
@@ -204,11 +197,7 @@ function renderEnquiries(){
 document.getElementById('enquirySearch').addEventListener('input',renderEnquiries);
 async function updateEnquiry(id,patch){
   await ensureClient();
-  let {error}=await sb.from('enquiries').update(patch).eq('id',id);
-  if(error){
-    const rpc=await sb.rpc('sb_admin_update_enquiry',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,eid:id,patch});
-    error=rpc.error;
-  }
+  const {error}=await sb.from('enquiries').update(patch).eq('id',id);
   if(error)alert(error.message);
   await loadEnquiries();
 }
@@ -227,7 +216,6 @@ window.saveNote=async id=>{
    upload to Supabase Storage -> store the public URL in the image_url field.
    --------------------------------------------------------------------------- */
 
-// Reusable "Image" form block for categories & services.
 function imageField(item){
   const url=item.image_url||'';
   return `
@@ -240,8 +228,6 @@ function imageField(item){
     </div>`;
 }
 
-// Shrink + re-encode an image file to a smaller JPEG, fully in the browser.
-// maxDim caps the longest side; quality drops automatically until it fits maxBytes.
 function compressImage(file,{maxDim=1280,quality=0.82,maxBytes=600*1024}={}){
   return new Promise((resolve,reject)=>{
     const img=new Image();
@@ -269,7 +255,6 @@ function compressImage(file,{maxDim=1280,quality=0.82,maxBytes=600*1024}={}){
   });
 }
 
-// Upload a compressed blob to Supabase Storage and return its public URL.
 async function uploadCatalogImage(blob,originalName){
   await ensureClient();
   if(!sb)throw new Error('Not connected to Supabase');
@@ -281,7 +266,6 @@ async function uploadCatalogImage(blob,originalName){
   return data.publicUrl;
 }
 
-// Wire up the file picker inside an open Add/Edit modal (if it has an image field).
 function wireImageUpload(){
   const fileInput=document.getElementById('f_image_file');
   if(!fileInput)return;
@@ -382,12 +366,8 @@ window.saveRow=async(table,id)=>{
   const payload=table==='categories'?readCategory():table==='services'?readService():readFaq();
   await ensureClient();
   const q=id?sb.from(table).update(payload).eq('id',id):sb.from(table).insert(payload);
-  let {error}=await q;
-  if(error){
-    const rpc=await sb.rpc('sb_admin_save',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,entity:table,payload,eid:id||null});
-    error=rpc.error;
-  }
-  if(error)return alert(error.message);
+  const {error}=await q;
+  if(error)return alert(notAdminHint(error));
   closeModal();
   if(table==='categories')loadCategories();
   if(table==='services')loadServices();
@@ -396,12 +376,8 @@ window.saveRow=async(table,id)=>{
 window.removeRow=async(table,id)=>{
   if(!confirm('Delete this item?'))return;
   await ensureClient();
-  let {error}=await sb.from(table).delete().eq('id',id);
-  if(error){
-    const rpc=await sb.rpc('sb_admin_delete',{u:ADMIN_USERNAME,p:ADMIN_PASSWORD,entity:table,eid:id});
-    error=rpc.error;
-  }
-  if(error)return alert(error.message);
+  const {error}=await sb.from(table).delete().eq('id',id);
+  if(error)return alert(notAdminHint(error));
   if(table==='categories')loadCategories();
   if(table==='services')loadServices();
   if(table==='faqs')loadFaqs();
