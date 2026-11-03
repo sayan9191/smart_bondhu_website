@@ -19,6 +19,9 @@ const ADMIN_PASSWORD='Admin@2026';
 const ADMIN_EMAIL='admin@smartbondhu.in';
 const ADMIN_FLAG='sb_admin_ok';
 
+// Storage bucket that holds category/service images (see supabase-catalog-images-setup.sql).
+const IMAGE_BUCKET='catalog-images';
+
 function showErr(msg){authError.hidden=false;authError.textContent=msg}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
@@ -219,13 +222,104 @@ window.saveNote=async id=>{
   closeModal();
 };
 
+/* ---------------------------------------------------------------------------
+   Image upload: pick from gallery/device -> compress in the browser ->
+   upload to Supabase Storage -> store the public URL in the image_url field.
+   --------------------------------------------------------------------------- */
+
+// Reusable "Image" form block for categories & services.
+function imageField(item){
+  const url=item.image_url||'';
+  return `
+    <label>Image</label>
+    <div class="img-upload">
+      <img id="f_image_preview" alt="Preview" style="max-width:140px;max-height:140px;border-radius:10px;object-fit:cover;display:${url?'block':'none'};margin:4px 0 8px;border:1px solid #e3ebe3" src="${esc(url)}">
+      <input id="f_image_file" type="file" accept="image/*">
+      <div id="f_image_status" class="img-status" style="font-size:13px;color:#4a6a57;min-height:18px;margin:6px 0"></div>
+      <input id="f_image_url" type="text" value="${esc(url)}" placeholder="Auto-filled after upload — or paste an image URL">
+    </div>`;
+}
+
+// Shrink + re-encode an image file to a smaller JPEG, fully in the browser.
+// maxDim caps the longest side; quality drops automatically until it fits maxBytes.
+function compressImage(file,{maxDim=1280,quality=0.82,maxBytes=600*1024}={}){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const objectUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(objectUrl);
+      let {width,height}=img;
+      if(width>maxDim||height>maxDim){
+        if(width>=height){height=Math.round(height*maxDim/width);width=maxDim;}
+        else{width=Math.round(width*maxDim/height);height=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=width;canvas.height=height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,width,height);
+      const tryExport=q=>canvas.toBlob(b=>{
+        if(!b)return reject(new Error('Could not process this image'));
+        if(b.size>maxBytes&&q>0.45)return tryExport(Math.round((q-0.12)*100)/100);
+        resolve(b);
+      },'image/jpeg',q);
+      tryExport(quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objectUrl);reject(new Error('Could not read this image'));};
+    img.src=objectUrl;
+  });
+}
+
+// Upload a compressed blob to Supabase Storage and return its public URL.
+async function uploadCatalogImage(blob,originalName){
+  await ensureClient();
+  if(!sb)throw new Error('Not connected to Supabase');
+  const base=(originalName||'image').toLowerCase().replace(/\.[^.]+$/,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'image';
+  const path=`catalog/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${base}.jpg`;
+  const {error}=await sb.storage.from(IMAGE_BUCKET).upload(path,blob,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});
+  if(error)throw error;
+  const {data}=sb.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// Wire up the file picker inside an open Add/Edit modal (if it has an image field).
+function wireImageUpload(){
+  const fileInput=document.getElementById('f_image_file');
+  if(!fileInput)return;
+  const urlInput=document.getElementById('f_image_url');
+  const preview=document.getElementById('f_image_preview');
+  const status=document.getElementById('f_image_status');
+  urlInput.addEventListener('input',()=>{
+    if(urlInput.value){preview.src=urlInput.value;preview.style.display='block';}
+    else{preview.style.display='none';}
+  });
+  fileInput.addEventListener('change',async()=>{
+    const file=fileInput.files&&fileInput.files[0];
+    if(!file)return;
+    if(!/^image\//.test(file.type)){status.textContent='Please choose an image file.';return;}
+    const originalKb=Math.round(file.size/1024);
+    status.textContent='Compressing…';
+    try{
+      const blob=await compressImage(file);
+      preview.src=URL.createObjectURL(blob);
+      preview.style.display='block';
+      const newKb=Math.round(blob.size/1024);
+      status.textContent=`Uploading… (${originalKb} KB → ${newKb} KB)`;
+      const url=await uploadCatalogImage(blob,file.name);
+      urlInput.value=url;
+      status.textContent=`Uploaded ✓  ${originalKb} KB → ${newKb} KB`;
+    }catch(err){
+      status.textContent='Upload failed: '+(err&&err.message?err.message:String(err));
+    }
+  });
+}
+
 function formFields(item,type){
   if(type==='category')return `
     <label>Name</label><input id="f_name" value="${esc(item.name||'')}">
     <label>Description</label><textarea id="f_description">${esc(item.description||'')}</textarea>
     <label>Pills (comma separated)</label><input id="f_pills" value="${esc((item.pills||[]).join(', '))}">
     <label>Emoji</label><input id="f_emoji" value="${esc(item.emoji||'')}">
-    <label>Image URL</label><input id="f_image_url" value="${esc(item.image_url||'')}">
+    ${imageField(item)}
     <label>Sort order</label><input id="f_sort_order" type="number" value="${item.sort_order??0}">
     <label class="check"><input id="f_active" type="checkbox" ${item.active!==false?'checked':''}> Visible on website</label>`;
   if(type==='service')return `
@@ -235,7 +329,7 @@ function formFields(item,type){
     <label>Details</label><textarea id="f_details">${esc(item.details||'')}</textarea>
     <label>Pricing notes</label><textarea id="f_pricing_notes">${esc(item.pricing_notes||'')}</textarea>
     <label>Emoji</label><input id="f_emoji" value="${esc(item.emoji||'')}">
-    <label>Image URL</label><input id="f_image_url" value="${esc(item.image_url||'')}">
+    ${imageField(item)}
     <label>Image color</label><input id="f_image_color" value="${esc(item.image_color||'#e9f1e9')}">
     <label>Sort order</label><input id="f_sort_order" type="number" value="${item.sort_order??0}">
     <label class="check"><input id="f_featured" type="checkbox" ${item.featured?'checked':''}> Show in most requested</label>
@@ -281,6 +375,7 @@ window.editRow=(table,id)=>{
   const item=id?list.find(x=>x.id===id)||{}:{};
   const type=table==='categories'?'category':table==='services'?'service':'faq';
   openModal(`<div class="admin-form"><h2>${id?'Edit':'Add'} ${type}</h2>${formFields(item,type)}<div class="form-actions"><button class="button" type="button" id="saveBtn">Save</button></div></div>`);
+  wireImageUpload();
   document.getElementById('saveBtn').onclick=()=>saveRow(table,id||null);
 };
 window.saveRow=async(table,id)=>{
