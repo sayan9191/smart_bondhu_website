@@ -126,9 +126,10 @@ async function loadDashboard(){
   if(!box)return;
   box.innerHTML='<p>Loading…</p>';
   try{
-    const s=await apiGet('/admin/dashboard/stats');
+    const today=new Date().toISOString().slice(0,10);
+    const s=await apiGet('/admin/dashboard/stats?start_date=2020-01-01&end_date='+today);
     const cards=[
-      ['Revenue',inr(s.total_revenue),'In selected period'],
+      ['Revenue',inr(s.total_revenue),'All time'],
       ['Revenue today',inr(s.revenue_today),'Live today'],
       ['Bookings',s.total_bookings,(s.bookings_today||0)+' today'],
       ['Users',s.total_users,(s.new_users_today||0)+' today'],
