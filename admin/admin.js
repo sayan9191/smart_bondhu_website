@@ -22,6 +22,15 @@ const ADMIN_EMAIL='admin@smartbondhu.in';
 // Storage bucket that holds category/service images.
 const IMAGE_BUCKET='catalog-images';
 
+// Backend API (bookings + dashboard live here, not in Supabase).
+const BACKEND_API='https://eal5zocqpln7howaxskjjvdmcm0asgdb.lambda-url.ap-south-1.on.aws/api/v1';
+const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0});
+async function apiGet(path){
+  const r=await fetch(BACKEND_API+path,{headers:{'Accept':'application/json'}});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
 function showErr(msg){authError.hidden=false;authError.textContent=msg}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
@@ -106,7 +115,64 @@ document.getElementById('logoutBtn').onclick=async()=>{
 async function enterApp(){
   authScreen.hidden=true;
   appScreen.hidden=false;
+  loadDashboard();
+  loadBookings();
   await Promise.all([loadEnquiries(),loadDeletions(),loadCategories(),loadServices(),loadFaqs()]);
+}
+
+/* ---- Dashboard + Bookings (data comes from the backend API) ---- */
+async function loadDashboard(){
+  const box=document.getElementById('statGrid');
+  if(!box)return;
+  box.innerHTML='<p>Loading…</p>';
+  try{
+    const s=await apiGet('/admin/dashboard/stats');
+    const cards=[
+      ['Revenue',inr(s.total_revenue),'In selected period'],
+      ['Revenue today',inr(s.revenue_today),'Live today'],
+      ['Bookings',s.total_bookings,(s.bookings_today||0)+' today'],
+      ['Users',s.total_users,(s.new_users_today||0)+' today'],
+      ['Pending',s.pending_bookings,'Awaiting action'],
+      ['Completed',s.completed_bookings,(s.active_vendors||0)+' active vendors'],
+    ];
+    box.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'+cards.map(c=>`
+      <div style="background:#fff;border:1px solid #e3ebe3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6b7f72;font-weight:600;text-transform:uppercase;letter-spacing:.03em">${esc(c[0])}</div><div style="font-size:24px;font-weight:800;color:#163a2b;margin:6px 0 2px">${esc(c[1])}</div><div style="font-size:12px;color:#8aa095">${esc(c[2])}</div></div>`).join('')+'</div>';
+  }catch(e){
+    box.innerHTML=`<p>Could not load dashboard (${esc(e.message)}). If this says "Failed to fetch", the backend may still be deploying — try again shortly.</p>`;
+  }
+}
+
+let bookings=[];
+async function loadBookings(){
+  const box=document.getElementById('bookingList');
+  if(!box)return;
+  box.innerHTML='<p>Loading…</p>';
+  try{
+    const data=await apiGet('/admin/bookings?page=1&page_size=100');
+    bookings=data.items||[];
+    renderBookings();
+  }catch(e){
+    box.innerHTML=`<p>Could not load bookings (${esc(e.message)}).</p>`;
+  }
+}
+function renderBookings(){
+  const q=(document.getElementById('bookingSearch').value||'').toLowerCase();
+  const rows=bookings.filter(b=>[b.booking_number,b.customer_name,b.customer_phone,b.service_name].join(' ').toLowerCase().includes(q));
+  const box=document.getElementById('bookingList');
+  box.innerHTML=rows.length?rows.map(b=>`<article class="admin-card">
+    <h3>${esc(b.customer_name||'Customer')} · ${esc(b.booking_number||'')}</h3>
+    <div class="admin-meta">
+      <span>${esc(b.service_name||'')}</span>
+      <span>${esc(b.customer_phone||'')}</span>
+      <span class="status ${esc(b.status||'')}">${esc(b.status||'')}</span>
+      <span>${b.scheduled_at?new Date(b.scheduled_at).toLocaleString():''}</span>
+      <span><b>${esc(inr(b.total_amount))}</b></span>
+    </div>
+    ${b.address_summary?`<p>${esc(b.address_summary)}</p>`:''}
+    <div class="admin-actions">
+      ${b.customer_phone?`<a class="button small" href="tel:${esc(b.customer_phone)}">Call</a>`:''}
+    </div>
+  </article>`).join(''):'<p>No bookings found.</p>';
 }
 
 function notAdminHint(error){
@@ -386,5 +452,7 @@ window.removeRow=async(table,id)=>{
 document.getElementById('addCategory').onclick=()=>editRow('categories',null);
 document.getElementById('addService').onclick=()=>editRow('services',null);
 document.getElementById('addFaq').onclick=()=>editRow('faqs',null);
+const _bookingSearch=document.getElementById('bookingSearch');
+if(_bookingSearch)_bookingSearch.addEventListener('input',renderBookings);
 
 boot();
